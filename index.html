@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>MaiAgent 智能客服</title>
+  <meta name="description" content="MaiAgent AI 智能對話助理" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="color-scheme" content="light dark" />
+
+  <!-- iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MaiAgent" />
+  <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+  <link rel="icon" href="./icons/icon-192.png" />
+
+  <style>
+    :root { color-scheme: light dark; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #4f46e5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Fill the dynamic viewport incl. iOS safe areas */
+    #app {
+      position: fixed;
+      inset: 0;
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    iframe {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    /* Loading splash */
+    #loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: linear-gradient(160deg, #4f46e5 0%, #7c3aed 100%);
+      color: #fff;
+      z-index: 10;
+      transition: opacity .4s ease;
+    }
+    #loader.hide { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loader p { font-size: 15px; letter-spacing: .04em; opacity: .9; }
+
+    /* Fallback if the iframe is blocked */
+    #fallback {
+      display: none;
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      text-align: center;
+      background: #fff;
+      color: #1f2937;
+      z-index: 20;
+    }
+    #fallback a {
+      display: inline-block;
+      padding: 12px 22px;
+      background: #4f46e5;
+      color: #fff;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <iframe
+      id="chat"
+      src="https://chat.maiagent.ai/web-chats/c99e7862-73ff-4c41-a5bf-8a5d3b14bb1c"
+      title="MaiAgent 智能客服"
+      allow="microphone; camera; clipboard-read; clipboard-write; autoplay; fullscreen"
+      referrerpolicy="no-referrer-when-downgrade"
+      loading="eager"></iframe>
+  </div>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <p>載入中…</p>
+  </div>
+
+  <div id="fallback">
+    <h2>無法在 App 內顯示對話</h2>
+    <p>請點擊下方按鈕在瀏覽器開啟。</p>
+    <a href="https://chat.maiagent.ai/web-chats/c99e7862-73ff-4c41-a5bf-8a5d3b14bb1c" target="_blank" rel="noopener">開啟對話</a>
+  </div>
+
+  <script>
+    const loader = document.getElementById("loader");
+    const iframe = document.getElementById("chat");
+    const fallback = document.getElementById("fallback");
+
+    let loaded = false;
+    iframe.addEventListener("load", () => {
+      loaded = true;
+      loader.classList.add("hide");
+      setTimeout(() => (loader.style.display = "none"), 450);
+    });
+
+    // If the iframe never loads (blocked / network), show fallback.
+    setTimeout(() => {
+      if (!loaded) {
+        loader.style.display = "none";
+        fallback.style.display = "flex";
+      }
+    }, 12000);
+
+    // Register the service worker for installability + offline shell.
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch((e) =>
+          console.warn("SW registration failed:", e)
+        );
+      });
+    }
+  </script>
+</body>
+</html>
