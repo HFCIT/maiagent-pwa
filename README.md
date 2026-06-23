@@ -9,8 +9,9 @@
 | `index.html` | 全螢幕內嵌 iframe + Service Worker 註冊 + 載入動畫/備援 |
 | `manifest.webmanifest` | PWA 安裝設定（名稱、圖示、顯示模式） |
 | `sw.js` | Service Worker，快取殼層讓 App 可安裝且支援離線開啟 |
-| `icons/` | 192 / 512 / 180（iOS）App 圖示 |
-| `build-icons.cjs` | 純 Node（無相依套件）圖示產生器 |
+| `Logo.png` | 來源 Logo（吉祥物），圖示由此縮放產生 |
+| `icons/` | 192 / 512 / 180（iOS）App 圖示，來自 `Logo.png` |
+| `build-icons.ps1` | 用 .NET System.Drawing 從 `Logo.png` 產生各尺寸圖示 |
 
 ## 部署
 
@@ -28,6 +29,8 @@ PWA 需在 HTTPS（或 localhost）下才能安裝。
 
 ## 重新產生圖示
 
-```bash
-node build-icons.cjs
+換掉 `Logo.png` 後重新產生各尺寸：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build-icons.ps1
 ```
